@@ -1,0 +1,22 @@
+services:
+  host-phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: host-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "5001:80"
+    environment:
+      # Add DB container names here, separated by commas
+      PMA_HOSTS: mvault-db,help-db
+      UPLOAD_LIMIT: 100M
+    networks:
+      - dbmanage-network
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://localhost:514"
+        tag: "host-phpmyadmin"
+networks:
+  dbmanage-network:
+    driver: bridge
+    external: true
