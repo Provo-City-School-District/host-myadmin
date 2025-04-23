@@ -9,6 +9,8 @@ services:
       # Add DB container names here, separated by commas
       PMA_HOSTS: mvault-db,help-db
       UPLOAD_LIMIT: 100M
+      PMA_ABSOLUTE_URI: https://host-myadmin.provo.edu/
+      PMA_FORCE_SSL: "true" # Force HTTPS
     networks:
       - dbmanage-network
     logging:
