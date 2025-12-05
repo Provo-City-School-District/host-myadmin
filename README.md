@@ -38,7 +38,7 @@ Open your crontab editor:
 Add the following line to run the update script daily at midnight:
 
 ```bash
-0 0 * * * /bin/bash /path/to/update-phpmyadmin.sh
+0 0 * * * /bin/bash /path/to/update-container.sh
 ```
 
 Replace `/path/to/update-phpmyadmin.sh` with the actual path to the script.
