@@ -32,16 +32,32 @@ The server dropdown is built automatically: every running container on `dbmanage
 
 Clone this repository to `/docker/host-myadmin` (the update script expects that path).
 
-Create `.env` from the example and set `PMA_ABSOLUTE_URI` to the address this host is reached at (for example `https://stage-myadmin.provo.edu/`). It must match the real DNS name, or phpMyAdmin builds links and redirects for the wrong host.
+### Absolute URI
+
+Each host needs its own `PMA_ABSOLUTE_URI` in `.env`: the address that host is reached at. It must match the real DNS name, or phpMyAdmin builds links and redirects for the wrong host.
 
 ```bash
 cp .env.example .env
 ```
 
-Then start it:
+Edit `.env` so the line holds this host's address, for example:
+
+```
+PMA_ABSOLUTE_URI=https://stage-myadmin.provo.edu/
+```
+
+A host that already has a `.env` (it will only contain `PMA_HOSTS`) just needs that line added.
+
+### Start
 
 ```bash
 bash update-container.sh
+```
+
+Check the container picked up the right address:
+
+```bash
+docker exec host-phpmyadmin printenv PMA_ABSOLUTE_URI
 ```
 
 `.env` is not committed. The script adds the server list (`PMA_HOSTS`) to it and replaces only that line on later runs. Until `.env` has both values, `docker compose up -d` refuses to start; after that, plain `docker compose` commands work.
