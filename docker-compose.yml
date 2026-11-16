@@ -8,7 +8,8 @@ services:
     environment:
       PMA_HOSTS: ${PMA_HOSTS:?run update-container.sh, it writes this list to .env}
       UPLOAD_LIMIT: 5G
-      PMA_ABSOLUTE_URI: https://host-myadmin.provo.edu/
+      # Differs per host, so it lives in .env rather than here
+      PMA_ABSOLUTE_URI: ${PMA_ABSOLUTE_URI:?set it in .env, see .env.example}
       MAX_EXECUTION_TIME: 0
     volumes:
       # Apache caps request bodies at 1G by default; this lifts it so UPLOAD_LIMIT is the only cap

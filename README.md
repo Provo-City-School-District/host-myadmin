@@ -30,13 +30,21 @@ The server dropdown is built automatically: every running container on `dbmanage
 
 ## Start phpMyAdmin
 
-Clone this repository to `/docker/host-myadmin` (the update script expects that path), then:
+Clone this repository to `/docker/host-myadmin` (the update script expects that path).
+
+Create `.env` from the example and set `PMA_ABSOLUTE_URI` to the address this host is reached at (for example `https://stage-myadmin.provo.edu/`). It must match the real DNS name, or phpMyAdmin builds links and redirects for the wrong host.
+
+```bash
+cp .env.example .env
+```
+
+Then start it:
 
 ```bash
 bash update-container.sh
 ```
 
-The script writes the server list to `.env` (not committed, overwritten on every run). Until it has run once, `docker compose up -d` refuses to start; after that, plain `docker compose` commands work.
+`.env` is not committed. The script adds the server list (`PMA_HOSTS`) to it and replaces only that line on later runs. Until `.env` has both values, `docker compose up -d` refuses to start; after that, plain `docker compose` commands work.
 
 ## Automatic Updates
 
