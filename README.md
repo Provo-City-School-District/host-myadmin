@@ -24,10 +24,23 @@ services:
       - dbmanage-network
 ```
 
+## Server list
+
+The server dropdown is built automatically: every running container on `dbmanage-network` is listed. After adding a DB container to the network, run `update-container.sh` (or wait for the nightly cron run) for it to show up. A DB container that is stopped when the script runs drops off the list until the next run.
+
+## Start phpMyAdmin
+
+Clone this repository to `/docker/host-myadmin` (the update script expects that path), then:
+
+```bash
+bash update-container.sh
+```
+
+The script writes the server list to `.env` (not committed, overwritten on every run). Until it has run once, `docker compose up -d` refuses to start; after that, plain `docker compose` commands work.
+
 ## Automatic Updates
 
-To ensure the `phpMyAdmin` container stays up to date, follow these steps:
-To run this script automatically, add a cron job:
+To keep the `phpMyAdmin` container up to date, run `update-container.sh` from cron.
 
 Open your crontab editor:
 
@@ -35,12 +48,18 @@ Open your crontab editor:
   crontab -e
 ```
 
-Add the following line to run the update script daily at midnight:
+Add the following line to run the update script daily at 00:30. Keep it clear of the time other stacks restart their DB containers: a DB that is down when the script runs drops off the server list.
 
 ```bash
-0 0 * * * /bin/bash /path/to/update-container.sh
+30 0 * * * /bin/bash /docker/host-myadmin/update-container.sh >> "$HOME/update-phpmyadmin.log" 2>&1
 ```
 
-Replace `/path/to/update-phpmyadmin.sh` with the actual path to the script.
+The container is only restarted when the image, the compose config, or the server list changed. Failures are written to the log file.
 
-The script is included in the repository.
+## Large Imports
+
+`UPLOAD_LIMIT` only sets the PHP limits. Apache has its own 1G request body cap, removed by `pma-limits.conf` (mounted by the compose file), so `UPLOAD_LIMIT` is the only value to change. Deploy the conf file alongside `docker-compose.yml`.
+
+Any reverse proxy in front needs a body limit at least as large as `UPLOAD_LIMIT` (`LimitRequestBody` in Apache, `client_max_body_size` in nginx) and a long proxy timeout.
+
+Prefer `.sql.gz` over `.zip`. phpMyAdmin loads zip contents fully into memory.

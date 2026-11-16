@@ -6,11 +6,19 @@ services:
     ports:
       - "5001:80"
     environment:
-      # Add DB container names here, separated by commas
-      PMA_HOSTS: mvault-db,help-db
-      UPLOAD_LIMIT: 1G
+      PMA_HOSTS: ${PMA_HOSTS:?run update-container.sh, it writes this list to .env}
+      UPLOAD_LIMIT: 5G
       PMA_ABSOLUTE_URI: https://host-myadmin.provo.edu/
-      PMA_FORCE_SSL: "true" # Force HTTPS
+      MAX_EXECUTION_TIME: 0
+    volumes:
+      # Apache caps request bodies at 1G by default; this lifts it so UPLOAD_LIMIT is the only cap
+      - type: bind
+        source: ./pma-limits.conf
+        target: /etc/apache2/conf-enabled/pma-limits.conf
+        read_only: true
+        bind:
+          # Without this, a missing file becomes an empty directory and Apache silently keeps the 1G cap
+          create_host_path: false
     networks:
       - dbmanage-network
     logging:
@@ -20,5 +28,4 @@ services:
         tag: "host-phpmyadmin"
 networks:
   dbmanage-network:
-    driver: bridge
     external: true
